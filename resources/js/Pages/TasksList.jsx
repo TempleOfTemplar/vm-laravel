@@ -2,12 +2,18 @@ import React, {useEffect, useMemo, useState} from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Head} from '@inertiajs/inertia-react';
 import AsyncSelect from 'react-select/async';
+import AuthSuccessLayout from "@/Layouts/AuthSuccessLayout";
+import Sidebar from "@/Components/Sidebar";
+import {Box, Drawer, DrawerContent, useDisclosure} from "@chakra-ui/react";
+import ItemsList from "@/Components/ItemsList";
 
 
 export default function TasksList(props) {
     const [selectedToys, setSelectedToys] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState(null);
     const [tasks, setTasks] = useState([]);
+    const {isOpen, onClose} = useDisclosure();
+
     const query = useMemo(() => {
         const selectedToysIds = selectedToys?.map(selectedToy => selectedToy.id);
         const selectedCategoriesIds = selectedCategories?.map(selectedCategory => selectedCategory.id);
@@ -21,9 +27,11 @@ export default function TasksList(props) {
         return toReturn;
     }, [selectedToys, selectedCategories]);
 
-    useEffect(async () => {
-        const loadedTasks = await fetch(`/api/tasks?${query}`).then(res => res.json().then(res => res.data));
-        setTasks(loadedTasks);
+    useEffect(() => {
+        fetch(`/api/tasks?${query}`)
+            .then(res => res.json().then(res => res.data))
+            .then(loadedTasks => setTasks(loadedTasks));
+
     }, [query]);
 
     // handle selection
@@ -45,13 +53,11 @@ export default function TasksList(props) {
     };
 
     return (
-        <AuthenticatedLayout
+        <AuthSuccessLayout
             auth={props.auth}
             errors={props.errors}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Tasks List</h2>}
         >
-            <Head title="Tasks List"/>
-
             <div className="py-12">
                 <AsyncSelect
                     cacheOptions
@@ -75,8 +81,9 @@ export default function TasksList(props) {
                 />
             </div>
             <div className="py-12">
-                {tasks.map(task => <div>{task.title}</div>)}
+                <ItemsList items={tasks}></ItemsList>
+                {/*{tasks.map(task => <div key={task.id}>{task.title}</div>)}*/}
             </div>
-        </AuthenticatedLayout>
+        </AuthSuccessLayout>
     );
 }

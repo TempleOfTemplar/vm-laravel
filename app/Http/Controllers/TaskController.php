@@ -17,13 +17,7 @@ class TaskController extends Controller
     {
         $selectedToys = $request->query("selectedToys");
         $selectedCategories = $request->query("selectedCategories");
-        // $tasks = Task::whereIn("id",);
-//        clock()->info($selectedToys);
-//        clock()->info($selectedCategories);
-        // $query = Task;
-
         $tasks = Task::where(function ($query) use ($selectedToys, $selectedCategories) {
-
             if ($selectedToys && is_array($selectedToys)) {
                 clock()->info($selectedToys);
 
@@ -39,7 +33,7 @@ class TaskController extends Controller
                     $query->whereIn('category_id', $selectedCategories);
                 });
             }
-        })->get();
+        })->with("author")->with("toys")->get();
 
 
 //
